@@ -2,12 +2,13 @@
 
 # p = pawn, Q = queen, K = king, k = knight, b = bishop, r = rook
 
+
 class Board:
-    #takes pos from each figure and creates and prints a board
-    #__set_pos_to_figures() and update() merge??
+    # takes pos from each figure and creates and prints a board
+    # set_pos_to_figures() and update() merge??
     
     def __init__(self, positions, visible_board=[]):
-        self.positions = positions #not actually positions but instances of the Figures class
+        self.positions = positions  # not actually positions but instances of the Figures class
         self.visible_board = visible_board
     
     def __set_pos_to_figures(self):
@@ -22,9 +23,8 @@ class Board:
             {"A2": "_", "B2": "_", "C2": "_", "D2": "_", "E2": "_", "F2": "_", "G2": "_", "H2": "_"},
             {"A1": "_", "B1": "_", "C1": "_", "D1": "_", "E1": "_", "F1": "_", "G1": "_", "H1": "_"},
             ]
-        
-        
-        #can probably be improved - list comprehension???
+
+        # can probably be improved - list comprehension???
         for line in figures:
             for tile in line:
                 for position in self.positions:
@@ -33,9 +33,6 @@ class Board:
         
         return figures
 
-
-           
-    
     
     def update(self):
         """ Updates self.visible_board with figures """
@@ -49,8 +46,7 @@ class Board:
             self.visible_board.append(lst)
         
 #        return self.visible_board - neccessary in any situation?
-        
-        
+
     def __str__(self):
         """ returns visible_board in the correct format """
         counter = 8
@@ -60,7 +56,6 @@ class Board:
         for row in self.visible_board:
             res += str(counter) + " | " + " | ".join(row) + " |\n"
             counter -= 1
-        res += "    A   B   C   D   E   F   G   H"
+        res += "    A   B   C   D   E   F   G   H\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n"
         
         return res
-        
