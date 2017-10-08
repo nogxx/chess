@@ -7,13 +7,77 @@ class Board:
     # takes pos from each figure and creates and prints a board
     # set_pos_to_figures() and update() merge??
     
-    def __init__(self, positions, visible_board=[]):
-        self.positions = positions  # not actually positions but instances of the Figures class
+    def __init__(self, figures_lst=[], visible_board=[]):
+        self.figures_lst = figures_lst  # not actually positions but instances of the Figures class
         self.visible_board = visible_board
+
+    def is_free(self, pos, color=None):
+        """ returns True if a pos is free, otherwise returns False
+
+        if color then checks if pos is free FROM color
+
+        """
+
+        # staticmethod or classmethod???
+
+        if color:
+            for figure in self.figures_lst:
+                if figure.pos == pos and figure.color == color:
+                    return False
+            return True
+
+        for figure in self.figures_lst:
+            if figure.pos == pos:
+                return False
+
+        return True
+
+    def is_check(self):
+        """ returns True if any figure could strike a Kind, else False"""
+        for fig in self.figures_lst:
+            if fig.name == "K" and fig.color == "white":
+                print("found white king")
+                white_king_pos = fig.pos
+            elif fig.name == "K" and fig.color == "black":
+                print("found black king", fig.name, fig.color, fig.pos)
+                black_king_pos = fig.pos
+
+        # loop through all white figures and look if anyone can kill the king
+
+        print(black_king_pos, white_king_pos)
+        for fig in self.figures_lst:
+            if fig.color == "white" and fig.is_legal_move(black_king_pos):
+                return True
+            elif fig.color == "black" and fig.is_legal_move(white_king_pos):
+                return True
+
+        return False
+
+
+
+    def del_and_move_and_update(self, desired_pos, a_figure, output=True):
+        """ move figure??
+
+        removes an instance of the Figure class from self.figures_lst
+
+        """
+
+        for figure_ in self.figures_lst:
+            if figure_.pos == desired_pos:
+                self.figures_lst.remove(figure_)
+
+
+        for figure_ in self.figures_lst:
+            figure_.pos = desired_pos
+
+        self.update()
+
+        if output:  # output should only ever be False if you want to unittest
+            print(self)
     
     def __set_pos_to_figures(self):
             
-        figures = [
+        figures_table = [
             {"A8": "_", "B8": "_", "C8": "_", "D8": "_", "E8": "_", "F8": "_", "G8": "_", "H8": "_"},
             {"A7": "_", "B7": "_", "C7": "_", "D7": "_", "E7": "_", "F7": "_", "G7": "_", "H7": "_"},
             {"A6": "_", "B6": "_", "C6": "_", "D6": "_", "E6": "_", "F6": "_", "G6": "_", "H6": "_"},
@@ -24,16 +88,17 @@ class Board:
             {"A1": "_", "B1": "_", "C1": "_", "D1": "_", "E1": "_", "F1": "_", "G1": "_", "H1": "_"},
             ]
 
-        # can probably be improved - list comprehension???
-        for line in figures:
-            for tile in line:
-                for position in self.positions:
-                    if tile == position.pos:
-                        line[tile] = position.name
-        
-        return figures
+        assert "figure" not in locals()
 
-    
+        # can probably be improved - list comprehension???
+        for line in figures_table:
+            for tile in line:
+                for figure in self.figures_lst:
+                    if tile == figure.pos:
+                        line[tile] = figure.name
+        
+        return figures_table
+
     def update(self):
         """ Updates self.visible_board with figures """
         self.visible_board.clear()
