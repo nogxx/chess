@@ -3,77 +3,48 @@
 class Figure:
     """Class to create all possible figures.
 
-    also checks if a given move is legal
+    is_legal_move(self, desired_pos) checks if a move is allowed.
 
     """
-    # TO DO: ship is_free to Board class??
 
-    figures_lst = []
-
-    def __init__(self, name, color, pos):
+    def __init__(self, name, color, pos, board):
         self.name = name
         self.color = color
         self.pos = pos
+        self.board = board
 
-        Figure.figures_lst.append(self)
-
-    def is_free(pos, color=None):
-        # returns True if a pos is free, otherwise returns False
-        # if color then checks if pos is free FROM color
-        # staticmethod or classmethod???
-
-        if color:
-            for figure in Figure.figures_lst:
-                if figure.pos == pos and figure.color == color:
-                    return False
-            return True
-
-        for figure in Figure.figures_lst:
-            if figure.pos == pos:
-                return False
-
-        return True
-
-    #bad func name?
-    def del_and_move_and_update(self, desired_pos, a_board, output=True):
-        # I don't have to actually deleted the instance of Figure class. I can just remove it from
-        # Figure.figures_list since the board updates its figures from this list. (probably :) )
-
-        for figure_ in Figure.figures_lst:
-            if figure_.pos == desired_pos:
-                Figure.figures_lst.remove(figure_)
-
-        self.pos = desired_pos
-        a_board.update()
-        if output:
-            print(a_board)
+        board.figures_lst.append(self)
 
     # p = pawn, Q = queen, K = king, k = knight, b = bishop, r = rook
 
-
     def is_legal_move(self, desired_pos):
+        """ returns True if the proposed move is egal, else False"""
 
-        # MOST USEFUL FUNCTION!!! NEXT TIME MAKE IT EARLIER x)
-        # import to pawns, rook, bishop, queen, king?
-        def change_pos(pos, x=0, y=0):
+        # import to pawns, rook, bishop, queen?
+
+        # make one big if for path
+
+        def shifted_pos(pos, x=0, y=0):
+            """ returns a shifted version of self.pos (x, y). Does NOT change self.pos"""
             return chr(ord(pos[0]) + x) + str(int(pos[1]) + y)
 
         # calculate all possible moves instead???, "K", "k" example
 
         path = []
-        possible_moves = []
 
         # RULE 1: must not move to a tile where there is a friendly figure
-        if not Figure.is_free(desired_pos, self.color):
-            print("RULE1")
+        if not self.board.is_free(desired_pos, self.color):
+            #print("RULE1")
             return False
 
         # RULE 2: must move at all
         if self.pos == desired_pos:
+            #print("RULE2")
             return False
 
         # RULE 3: must not move beyond the board
         if desired_pos not in [x + str(y) for x in "ABCDEFGH" for y in range(1, 9)]:
+            #print("RULE3")
             return False
 
         # - 1 - WHITE PAWN MOVES - 1 - 
@@ -85,13 +56,13 @@ class Figure:
                 move_ahead = 1
 
             # must not move ahead when there is a figure in front
-            if desired_pos == self.pos[0] + str(int(self.pos[1]) + 1) and not Figure.is_free(desired_pos):
+            if desired_pos == self.pos[0] + str(int(self.pos[1]) + 1) and not self.board.is_free(desired_pos):
                 return False
 
             # no left or right movement except when striking
             if self.pos[0] != desired_pos[0]:
                 # must not move left or right if there is no enemy there
-                if Figure.is_free(desired_pos, "black"):
+                if self.board.is_free(desired_pos, "black"):
                     return False
                 # must not move more than 1 tile either left or right
                 possible_pos_when_striking = [chr(ord(self.pos[0]) - 1), self.pos[0], chr(ord(self.pos[0]) + 1)]
@@ -117,13 +88,13 @@ class Figure:
                 move_down = 1
 
             # must not move down when there is a figure behind
-            if desired_pos == self.pos[0] + str(int(self.pos[1]) - 1) and not Figure.is_free(desired_pos):
+            if desired_pos == self.pos[0] + str(int(self.pos[1]) - 1) and not self.board.is_free(desired_pos):
                 return False
 
             # no left or right movement except when striking
             if self.pos[0] != desired_pos[0]:
                 # must not move left or right if there is no enemy there
-                if Figure.is_free(desired_pos, "white"):
+                if self.board.is_free(desired_pos, "white"):
                     return False
                 # must not move more than 1 tile either left or right
                 possible_pos_when_striking = [chr(ord(self.pos[0]) - 1), self.pos[0], chr(ord(self.pos[0]) + 1)]
@@ -171,7 +142,7 @@ class Figure:
                         path.append(self.pos[0] + str(int(self.pos[1]) - i))
 
             for pos in path:
-                if not Figure.is_free(pos):
+                if not self.board.is_free(pos):
                     return False
 
             return True
@@ -214,7 +185,7 @@ class Figure:
                         path.append(chr(ord(self.pos[0]) - i) + str(int(self.pos[1]) - i))
 
             for pos in path:
-                if not Figure.is_free(pos):
+                if not self.board.is_free(pos):
                     return False
 
             return True
@@ -222,10 +193,8 @@ class Figure:
         # - 5 - QUEEN MOVES - 5 - 
 
         elif self.name == "Q":
-
             # must not have a figure in its path moving left/right
             if self.pos[0] != desired_pos[0] and self.pos[1] == desired_pos[1]:
-                print(1)
                 distance = ord(desired_pos[0]) - ord(self.pos[0])  # positive = right, negative = left
 
                 if distance > 0:
@@ -237,7 +206,6 @@ class Figure:
 
             # must not have a figure in its path moving forward/backward
             elif self.pos[1] != desired_pos[1] and self.pos[0] == desired_pos[0]:
-                print(2)
                 distance = int(desired_pos[1]) - int(self.pos[1])  # positive = up, negative = down
 
                 # positive = up
@@ -261,7 +229,6 @@ class Figure:
 
                 distance = abs(ord(desired_pos[0]) - ord(self.pos[0]))
 
-                print(3)
                 # right/up
                 if int(desired_pos[1]) > int(self.pos[1]):
                     for i in range(1, distance):
@@ -280,7 +247,6 @@ class Figure:
 
                 distance = abs(ord(desired_pos[0]) - ord(self.pos[0]))
 
-                print(4)
                 # left/up
                 if int(desired_pos[1]) > int(self.pos[1]):
                     for i in range(1, distance):
@@ -292,7 +258,7 @@ class Figure:
                         path.append(chr(ord(self.pos[0]) - i) + str(int(self.pos[1]) - i))
 
             for pos in path:
-                if not Figure.is_free(pos):
+                if not self.board.is_free(pos):
                     return False
 
             return True
@@ -300,53 +266,37 @@ class Figure:
         # - 6 - KING MOVES - 6 -
 
         elif self.name == "K":
-            # METHOD 1: (work in progress)
-            #  # must not move more than 1 spot up or down
-            # if int(desired_pos[1]) > int(self.pos[1]) + 1 or int(desired_pos[1]) < int(self.pos[1]) - 1:
-            #     return False
-            # # must not move more than 1 spot right or left
-            # if ord(desired_pos[0]) > ord(self.pos[0]) + 1 or ord(desired_pos[0]) < ord(self.pos[0]) - 1:
-            #    return False
 
-            # METHOD 2:
-            #  return abs(ord(desired_pos[0]) - ord(self.pos[0])) == 1 and desired_pos[1] == self.pos[1] or \
-            #        desired_pos[0] == self.pos[0] and abs(int(desired_pos[1]) - int(self.pos[1])) == 1 or \
-            #        abs(ord(desired_pos[0]) - ord(self.pos[0])) == 1 and abs(
-            #            int(desired_pos[1]) - int(self.pos[1])) == 1
+            for x, y in (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1):
+                if shifted_pos(self.pos, x, y) == desired_pos:
+                    return True
 
-            moving_left_or_right_1 = abs(ord(desired_pos[0]) - ord(self.pos[0])) == 1 and desired_pos[1] == self.pos[1]
-            moving_up_or_down_1 = desired_pos[0] == self.pos[0] and abs(int(desired_pos[1]) - int(self.pos[1])) == 1
-            moving_diagonally_1 = abs(ord(desired_pos[0]) - ord(self.pos[0])) == 1 and abs(int(desired_pos[1]) - int(self.pos[1])) == 1
-
-            return moving_left_or_right_1 or moving_up_or_down_1 or moving_diagonally_1
+            return False  # not necessary but I don't know why
 
         # - 7 - KNIGHT MOVES - 7 -
 
         elif self.name == "k":
-            # left_bot = chr(ord(self.pos[0]) - 2) + str(int(self.pos[1]) - 2)
-            # left_top = chr(ord(self.pos[0]) - 2) + str(int(self.pos[1]) + 2)
-            # right_bot = chr(ord(self.pos[0]) + 2) + str(int(self.pos[1]) + 2)
-            # right_top = chr(ord(self.pos[0]) + 2) + str(int(self.pos[1]) - 2)
 
             for x, y in (-2, -1), (-1, -2), (1, -2), (2, -1), (-2, 1), (-1, 2), (1, 2), (2, 1):
-                possible_moves.append(change_pos(self.pos, x, y))
+                if shifted_pos(self.pos, x, y) == desired_pos:
+                    return True
 
-            return desired_pos in possible_moves
-
+            return False  # not necessary but I don't know why - None and False are both not True
 
 
 # - 8 - ROCHADE - 8 -
 # - 9 - EN PASSANT - 9 -
 # - 10 - CHECK - 10 -
 # - 11 - CHECKMATE - 11 -
-# - 12 - VERWANDLUNG - 12 -
+# - 12 - PROMOTION - 12 -
+
 
 def move(fig, pos, a_board, output=True):
     if fig.is_legal_move(pos):
         if output:
-            print("Moving from {} to {}".format(fig.pos, pos))
+            print("Moving from {} to {}!".format(fig.pos, pos))
 
-        fig.del_and_move_and_update(pos, a_board, output)
+        a_board.del_and_move_and_update(pos, a_board, output)
         return True
     else:
         if output:
