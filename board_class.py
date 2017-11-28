@@ -2,6 +2,7 @@
 
 # p = pawn, Q = queen, K = king, k = knight, b = bishop, r = rook
 
+# Test Commit #5
 
 class Board:
     # takes pos from each figure and creates and prints a board
